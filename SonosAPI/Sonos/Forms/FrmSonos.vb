@@ -68,8 +68,8 @@ Public Class FrmSonos
       ' Dim t = Me.Sonos.GetZoneGroupAttributes(IPAddress.Parse("192.168.2.184"))
       ' Dim z = Me.sonos.Play(Me.ip)
 
-      Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://192.168.2.31:3445/notify"), 360)
-      CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
+      'Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://192.168.2.31:3445/notify"), 360)
+      'CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
 
       Location = Me.frm.Location
    End Sub

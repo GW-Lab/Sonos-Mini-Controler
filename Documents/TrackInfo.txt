@@ -1,0 +1,28 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <s:Body>
+    <u:GetPositionInfoResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+      <Track>1</Track>
+      <TrackDuration>NOT_IMPLEMENTED</TrackDuration>
+      <TrackMetaData>NOT_IMPLEMENTED</TrackMetaData>
+      <TrackURI>x-rincon:RINCON_5CAAFD09637201400</TrackURI>
+      <RelTime>NOT_IMPLEMENTED</RelTime>
+      <AbsTime>NOT_IMPLEMENTED</AbsTime>
+      <RelCount>2147483647</RelCount>
+      <AbsCount>2147483647</AbsCount>
+    </u:GetPositionInfoResponse>
+  </s:Body>
+</s:Envelope>
+
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+	<item id="-1" parentID="-1" restricted="true">
+		<res protocolInfo="x-file-cifs:*:audio/mpeg:*" duration="0:06:45">x-file-cifs://NAS-01/music/Played-a-live%20(The%20Bongo%20Song).mp3</res>
+		<r:streamContent></r:streamContent>
+		<upnp:albumArtURI>/getaa?u=x-file-cifs%3a%2f%2fNAS-01%2fmusic%2fPlayed-a-live%2520(The%2520Bongo%2520Song).mp3&amp;v=115</upnp:albumArtURI>
+		<dc:title>Played-a-live (The Bongo Song)</dc:title>
+		<upnp:class>object.item.audioItem.musicTrack</upnp:class>
+		<dc:creator>Safri Duo</dc:creator>
+		<upnp:album>Drums</upnp:album>
+		<upnp:originalTrackNumber>1</upnp:originalTrackNumber>
+		<r:albumArtist>Safri Duo</r:albumArtist>
+	</item>
+</DIDL-Lite>

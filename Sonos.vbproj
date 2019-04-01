@@ -186,7 +186,9 @@
     <None Include="Pictures\print_preview.png" />
     <None Include="Pictures\speaker-off.png" />
     <None Include="Pictures\speaker-on.png" />
-    <None Include="Resources\SpeaketOn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

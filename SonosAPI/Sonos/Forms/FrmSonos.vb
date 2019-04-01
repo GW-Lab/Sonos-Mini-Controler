@@ -23,6 +23,7 @@ Public Class FrmSonos
 
    WithEvents Sonos As Sonos
    WithEvents SpeechEngine As New SpeechEngine
+   WithEvents CallBackHandler As CallBackHandler
 
 #Region "Constructor"
    Public Sub New(selectedRoom As String, frm As Form, sonos As Sonos)
@@ -35,7 +36,7 @@ Public Class FrmSonos
    End Sub
 #End Region
 
-   Private Sub FrmSonosTest_Load(sender As Object, e As EventArgs) Handles Me.Load
+   Private Async Sub FrmSonosTest_Load(sender As Object, e As EventArgs) Handles Me.Load
       ' Dim I = From d In Me.sonos.SSDP.rooms("Hobby room").Values Where d.isCoordinator Select d.IP
       ' TmrMain.Interval = My.Settings.Interval
 
@@ -67,7 +68,16 @@ Public Class FrmSonos
       ' Dim t = Me.Sonos.GetZoneGroupAttributes(IPAddress.Parse("192.168.2.184"))
       ' Dim z = Me.sonos.Play(Me.ip)
 
+      Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://192.168.2.31:3445/notify"), 360)
+      CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
+
       Location = Me.frm.Location
+   End Sub
+
+   Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
+      BeginInvoke(Sub()
+                     Dim a = 1
+                  End Sub)
    End Sub
 
    Private Sub CmbFavorites_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFavorites.SelectedIndexChanged

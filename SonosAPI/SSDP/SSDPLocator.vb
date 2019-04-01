@@ -9,6 +9,8 @@
 ' Reserved.: 
 
 Imports System.Net
+Imports System.Net.Http
+Imports System.Net.Http.Headers
 Imports System.Net.Sockets
 Imports System.Text
 Imports System.Threading
@@ -135,6 +137,36 @@ Public Class SSDPLocator : Inherits SonosAPIBase
          Case "ZP90" : Return Device.Device_Type.Connect
          Case Else : Return Device.Device_Type.Unknown
       End Select
+   End Function
+
+   Public Async Function Subscribe(subscribeURI As IEnumerable(Of Uri), callbackUri As Uri, Optional timeOutInSeconds As Integer = 360) As Task(Of Boolean)
+      Try
+         For Each uri In subscribeURI
+            Using req = New HttpRequestMessage With {.RequestUri = uri, .Version = HttpVersion.Version11}
+               req.Method = New HttpMethod("SUBSCRIBE")
+               req.Headers.UserAgent.Add(New ProductInfoHeaderValue("Sonos", "1.0"))
+               req.Headers.Add("CALLBACK", $"<{callbackUri.AbsoluteUri}>")
+               req.Headers.Add("NT", "upnp:event")
+               req.Headers.Add("TIMEOUT", $"Second-{timeOutInSeconds}")
+               req.Headers.ConnectionClose = True
+               req.Headers.CacheControl = New CacheControlHeaderValue With {.NoCache = True}
+
+               Using httpClient = New HttpClient()
+                  Await httpClient.SendAsync(req)
+               End Using
+
+               ' Dim response = Await httpClient.SendAsync(req)
+               ' Dim status = $"from {subscriptionUri.Host}. StatusCode: {response.StatusCode}"
+               ' Dim sid = $"SID: {response.Headers.GetValues("SID").First()}"
+               ' Dim timeOut = $"TIMEOUT: {response.Headers.GetValues("TIMEOUT").First}"
+               ' Dim server = $"Server: {response.Headers.GetValues("Server").First}"
+            End Using
+         Next
+
+         Return True
+      Catch e As Exception
+         Return False ' Console.WriteLine("ERROR TRYING TO SUBSCRIBE " & e)
+      End Try
    End Function
 End Class
 

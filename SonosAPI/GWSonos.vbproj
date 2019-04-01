@@ -162,6 +162,7 @@
     <Compile Include="Sonos\Forms\FrmSonos.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SSDP\CallBackHandler.vb" />
     <Compile Include="SSDP\Rooms.vb" />
     <Compile Include="SSDP\SSDPLocator.vb" />
     <Compile Include="Sonos\Track.vb" />

@@ -6,7 +6,13 @@
 ' Notes....: VB 16.0 RC4 .Net Framework 4.7.2
 ' Files....: None
 ' Programs.:
-' Reserved.: 
+' Reserved.:This SOFTWARE PRODUCT is provided by THE PROVIDER "as is" and "with all faults." THE PROVIDER makes no representations or warranties of any kind concerning the safety,
+'          : suitability, lack Of viruses, inaccuracies, typographical errors, Or other harmful components Of this SOFTWARE PRODUCT.
+'          : There are inherent dangers In the use Of any software, And you are solely responsible For determining whether this SOFTWARE PRODUCT Is compatible With your equipment
+'          : And other software installed On your equipment.
+'          : You are also solely responsible For the protection Of your equipment And backup Of your data, And THE PROVIDER will Not be liable For any damages you may suffer In connection
+'          : With Using, modifying, Or distributing this SOFTWARE PRODUCT.
+'          : Free To use 
 
 Imports System.Linq
 Imports GWSonos

@@ -83,7 +83,7 @@
     <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Kocco-Ndroid-Music2-glow.ico</ApplicationIcon>
+    <ApplicationIcon>GWSonos.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -182,7 +182,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Kocco-Ndroid-Music2-glow.ico" />
+    <Content Include="GWSonos.ico" />
     <None Include="Pictures\print_preview.png" />
     <None Include="Pictures\speaker-off.png" />
     <None Include="Pictures\speaker-on.png" />

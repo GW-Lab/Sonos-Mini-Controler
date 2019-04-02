@@ -13,17 +13,16 @@ Imports GWSonos.SpeechEngineBase
 Imports System.Windows.Forms
 
 Public Class FrmSonos
-   Private frmSettings As FrmSettings
-   Private frmFilter As FrmFilter
-   Private frm As Form
-
-   Private favorites As New Favorites
-   Private ip As Net.IPAddress
-   Private playMode As PlayMode
-
+   WithEvents CallBackHandler As CallBackHandler
    WithEvents Sonos As Sonos
    WithEvents SpeechEngine As New SpeechEngine
-   WithEvents CallBackHandler As CallBackHandler
+
+   Private favorites As New Favorites
+   Private frm As Form
+   Private frmFilter As FrmFilter
+   Private frmSettings As FrmSettings
+   Private ip As Net.IPAddress
+   Private playMode As PlayMode
 
 #Region "Constructor"
    Public Sub New(selectedRoom As String, frm As Form, sonos As Sonos)
@@ -35,6 +34,47 @@ Public Class FrmSonos
       TmrMain_Tick(Nothing, Nothing)
    End Sub
 #End Region
+
+   Private Sub BtnNextSong_Click(sender As Object, e As EventArgs) Handles BtnNextSong.Click
+      Sonos.Queue.NextTrack(Me.ip)
+      Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
+   End Sub
+
+   Private Sub BtnPreviousSong_Click(sender As Object, e As EventArgs) Handles BtnPreviousSong.Click
+      Sonos.Queue.PreviousTrack(Me.ip)
+      Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
+   End Sub
+
+   Private Sub BtnTrackRewind_Click(sender As Object, e As EventArgs) Handles BtnTrackRewind.Click
+      Sonos.Queue.Seek(Me.ip, Unit.REL_TIME) ' Rewind track
+   End Sub
+
+   Private Sub BtrFilter_Click(sender As Object, e As EventArgs) Handles BtnFilter.Click
+      Me.frmFilter = New FrmFilter(Me.Sonos, Me.ip, Me)
+      Me.frmFilter.Show(Me)
+   End Sub
+
+   Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
+      BeginInvoke(Sub()
+                     Dim a = 1
+                  End Sub)
+   End Sub
+
+   Private Sub CmbFavorites_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFavorites.SelectedIndexChanged
+      With DirectCast(DirectCast(sender, ComboBox).SelectedItem, Favorite)
+         Sonos.Queue.Clear(Me.ip)
+         Sonos.Queue.AddTrack(Me.ip, .StreamURI.ToString, .Ordinal)                                           ' Favorite.Ordinal Add track/radio to then current playlist 
+         Sonos.Queue.Seek(Me.ip, Unit.TRACK_NR, .Ordinal.ToString)
+         Sonos.Sound.Play(Me.ip)
+
+         LblIp.Text = $"{Me.ip}"
+      End With
+   End Sub
+
+   Private Sub FrmSonosTest_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+      Me.Sonos.Configuration.X = Location.X
+      Me.Sonos.Configuration.Y = Location.Y
+   End Sub
 
    Private Async Sub FrmSonosTest_Load(sender As Object, e As EventArgs) Handles Me.Load
       ' Dim I = From d In Me.sonos.SSDP.rooms("Hobby room").Values Where d.isCoordinator Select d.IP
@@ -74,81 +114,161 @@ Public Class FrmSonos
       Location = Me.frm.Location
    End Sub
 
-   Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
-      BeginInvoke(Sub()
-                     Dim a = 1
-                  End Sub)
-   End Sub
+   Private Sub GetRadioFavorites()
+      Dim insertPointer = 0
 
-   Private Sub CmbFavorites_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFavorites.SelectedIndexChanged
-      With DirectCast(DirectCast(sender, ComboBox).SelectedItem, Favorite)
-         Sonos.Queue.Clear(Me.ip)
-         Sonos.Queue.AddTrack(Me.ip, .StreamURI.ToString, .Ordinal)                                           ' Favorite.Ordinal Add track/radio to then current playlist 
-         Sonos.Queue.Seek(Me.ip, Unit.TRACK_NR, .Ordinal.ToString)
-         Sonos.Sound.Play(Me.ip)
+      Me.favorites.Clear()
+      CmbFavorites.Items.Clear()
+      Me.favorites = Sonos.SonosFavorites(Me.ip)                                                         ' Get ALL Sonos favorites
 
-         LblIp.Text = $"{Me.ip}"
-      End With
-   End Sub
-
-   Private Sub TrkSonosVolume_Scroll(sender As Object, e As EventArgs) Handles TrkSonosVolume.Scroll
-      Sonos.Sound.GroupVolume(Me.ip) = TrkSonosVolume.Value
-   End Sub
-
-   Private Sub BtnPreviousSong_Click(sender As Object, e As EventArgs) Handles BtnPreviousSong.Click
-      Sonos.Queue.PreviousTrack(Me.ip)
-      Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
-   End Sub
-
-   Private Sub BtnNextSong_Click(sender As Object, e As EventArgs) Handles BtnNextSong.Click
-      Sonos.Queue.NextTrack(Me.ip)
-      Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
-   End Sub
-
-   Private Sub TmrMain_Tick(sender As Object, e As EventArgs) Handles TmrMain.Tick
-      Try
-         If Me.ip Is Nothing Then
-            ContextMenuStrip = CmsMain
-            LblNasTracksCount.Text = Sonos.NASTracks.Count.ToString
-
-            Me.ip = Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP
-
-
-            GrpSource.Enabled = True
-            Enabled = True
-
-            SetSonosFunctionsRadioButtons()
-         Else
-            PicSpeaker.Image = If(Sonos.Sound.GroupMute(Me.ip), My.Resources.speaker_off, My.Resources.speaker_on)
-            TrkSonosVolume.Value = Sonos.Sound.GroupVolume(Me.ip)
-            Me.playMode = Sonos.Sound.PlayMode(Me.ip)
-
-            If RbtConnect.Checked Then
-               Text = "Source: Sonos connect"
-            ElseIf RbtLineIn.Checked Then
-               Text = $"Source: {Sonos.Rooms.devices(Me.ip.ToString).Type} lineIn"
-            ElseIf RbtQueue.Checked Then
-               Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
-            ElseIf RbtTV.Checked Then
-               Text = $"Source: {Sonos.Rooms.devices(Me.ip.ToString).Type} TV"
-            End If
+      For Each favorite In Me.favorites
+         If Not favorite.StreamURI.Contains(".mp3") Then
+            CmbFavorites.Items.Insert(insertPointer, favorite)
+            insertPointer = 1
          End If
-      Catch ex As Exception
-         Text = ex.Message
-      End Try
+      Next
+
+      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
    End Sub
 
-   Private Sub FrmSonosTest_Closed(sender As Object, e As EventArgs) Handles Me.Closed
-      Me.Sonos.Configuration.X = Location.X
-      Me.Sonos.Configuration.Y = Location.Y
+   Private Sub GetTrackFavorites()
+      Dim insertPointer = 0
+
+      Me.favorites.Clear()
+      CmbFavorites.Items.Clear()
+      Dim favorites = Sonos.SonosFavorites(Me.ip)                                                        ' Get ALL Sonos favorites
+
+      For Each favorite In favorites
+         If favorite.StreamURI.Contains(".mp3") Then
+            CmbFavorites.Items.Insert(insertPointer, favorite)
+            insertPointer = 1
+         End If
+      Next
+
+      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
+   End Sub
+
+   Private Sub GetTracksFromNAS()
+      CmbFavorites.Items.Clear()
+
+      Dim ordinal = 0
+      For Each track In Sonos.NASTracks
+         CmbFavorites.Items.Add(New Favorite With {.Title = track.Substring(15), .StreamURI = "x-file-cifs:" + track.Replace("\", "/"), .RemoteURI = track, .Ordinal = ordinal})
+         ordinal += 1
+      Next
+
+      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
+   End Sub
+
+   Private Sub MnuExit_Click(sender As Object, e As EventArgs) Handles MnuExit.Click
+      Close()
+   End Sub
+
+   Private Sub MnuScan_Click(sender As Object, e As EventArgs) Handles MnuScan.Click
+      Sonos.ScanNetworkForSonos()
+   End Sub
+
+   Private Sub MnuSettings_Click(sender As Object, e As EventArgs) Handles MnuSettings.Click
+      Me.frmSettings = New FrmSettings(Sonos, Me.ip, Me)
+      Me.frmSettings.Show(Me)
    End Sub
 
    Private Sub PicSpeaker_Click(sender As Object, e As EventArgs) Handles PicSpeaker.Click
       Sonos.Sound.GroupMute(Me.ip) = Not Sonos.Sound.GroupMute(Me.ip)
    End Sub
 
-   Private Sub BtnTrackRewind_Click(sender As Object, e As EventArgs) Handles BtnTrackRewind.Click
-      Sonos.Queue.Seek(Me.ip, Unit.REL_TIME) ' Rewind track
+   Private Sub RbtRadioFavorits_CheckedChanged(sender As Object, e As EventArgs) Handles RbtRadioFavorits.CheckedChanged,
+                                                                                         RbtTrackFavorits.CheckedChanged,
+                                                                                         RbtTrackNasFavorits.CheckedChanged
+      If DirectCast(sender, RadioButton).Checked Then
+         Select Case DirectCast(sender, RadioButton).Name
+            Case NameOf(RbtRadioFavorits)
+               BtnNextSong.Enabled = False
+               BtnPreviousSong.Enabled = False
+               BtnTrackRewind.Enabled = False
+               BtnFilter.Enabled = False
+
+               GetRadioFavorites()
+            Case NameOf(RbtTrackFavorits)
+               BtnNextSong.Enabled = False
+               BtnPreviousSong.Enabled = False
+               BtnTrackRewind.Enabled = False
+               BtnFilter.Enabled = False
+
+               GetTrackFavorites()
+            Case NameOf(RbtTrackNasFavorits)
+               GetTracksFromNAS()
+
+               If CmbFavorites.Items.Count > 0 Then
+                  BtnNextSong.Enabled = True
+                  BtnPreviousSong.Enabled = True
+                  BtnTrackRewind.Enabled = True
+                  BtnFilter.Enabled = True
+
+                  CmbFavorites_SelectedIndexChanged(CmbFavorites, Nothing)
+               End If
+         End Select
+      End If
+   End Sub
+
+   Private Sub RbtSelect_Source_Click(sender As Object, e As EventArgs) Handles RbtConnect.CheckedChanged,
+                                                                                RbtLineIn.CheckedChanged,
+                                                                                RbtQueue.CheckedChanged,
+                                                                                RbtTV.CheckedChanged
+      Try
+         If DirectCast(sender, RadioButton).Checked Then
+            Select Case DirectCast(sender, RadioButton).Name
+               Case NameOf(RbtConnect)
+                  GrpQueue.Enabled = False
+                  CmbFavorites.Enabled = False
+                  Sonos.SwitchTo.LineIn(Me.ip, Sonos.Rooms.devices.Where(Function(x) x.Value.Type = Device_Type.Connect).Single.Value)
+               Case NameOf(RbtTV)
+                  GrpQueue.Enabled = False
+                  CmbFavorites.Enabled = False
+                  Sonos.SwitchTo.TVIn(Me.ip, Sonos.Rooms.devices.Where(Function(x) x.Value.Type = Device_Type.Beam OrElse x.Value.Type = Device_Type.PlayBar OrElse x.Value.Type = Device_Type.SoundBar).Single.Value)
+               Case NameOf(RbtLineIn)
+                  GrpQueue.Enabled = False
+                  CmbFavorites.Enabled = False
+                  Sonos.SwitchTo.LineIn(Sonos.Rooms.devices(Me.ip.ToString))
+               Case NameOf(RbtQueue)
+                  GrpQueue.Enabled = True
+                  CmbFavorites.Enabled = True
+
+                  RbtTrackFavorits.Enabled = If(Sonos.NASTracks.Count > 0, True, False)
+                  RbtTrackNasFavorits.Enabled = If(Sonos.NASTracks.Count > 0, True, False)
+                  Sonos.SwitchTo.QueueIn(Me.ip, Sonos.Rooms.devices(Me.ip.ToString))
+
+                  If RbtRadioFavorits.Checked Then
+                     GetRadioFavorites()
+                  ElseIf RbtTrackFavorits.Checked Then
+                     GetTrackFavorites()
+                  ElseIf RbtTrackNasFavorits.Checked Then
+                     GetTracksFromNAS()
+                  End If
+            End Select
+
+            Sonos.Sound.Play(Me.ip)
+         End If
+      Catch ex As Exception
+      End Try
+   End Sub
+
+   Private Sub SetSonosFunctionsRadioButtons()
+      Dim TV = Sonos.Rooms(TxtSelectedRoom.Text).Values.Any(Function(x) x.Type = Device_Type.Beam OrElse x.Type = Device_Type.PlayBar OrElse x.Type = Device_Type.SoundBar)
+
+      RbtConnect.Enabled = Sonos.Rooms.devices.Values.Any(Function(x) x.Type = Device_Type.Connect)
+      RbtLineIn.Enabled = Sonos.Rooms(TxtSelectedRoom.Text).Values.Any(Function(x) x.Type = Device_Type.Play5)
+      RbtTV.Enabled = TV
+
+      If TV Then
+         RbtTV.Checked = True
+      Else
+         RbtQueue.Checked = True
+      End If
+   End Sub
+
+   Private Sub Sonos_Device_Search(msg As String) Handles Sonos.Device_Search
+      Text = msg
    End Sub
 
    Private Sub SpeechEngine_Command_Changed(cmd As Command) Handles SpeechEngine.Command_Changed
@@ -202,162 +322,41 @@ Public Class FrmSonos
       End Select
    End Sub
 
-   Private Sub BtrFilter_Click(sender As Object, e As EventArgs) Handles BtnFilter.Click
-      Me.frmFilter = New FrmFilter(Me.Sonos, Me.ip, Me)
-      Me.frmFilter.Show(Me)
-   End Sub
-
-   Private Sub MnuSettings_Click(sender As Object, e As EventArgs) Handles MnuSettings.Click
-      Me.frmSettings = New FrmSettings(Sonos, Me.ip, Me)
-      Me.frmSettings.Show(Me)
-   End Sub
-
-   Private Sub MnuExit_Click(sender As Object, e As EventArgs) Handles MnuExit.Click
-      Close()
-   End Sub
-
-   Private Sub MnuScan_Click(sender As Object, e As EventArgs) Handles MnuScan.Click
-      Sonos.ScanNetworkForSonos()
-   End Sub
-
-   Private Sub RbtSelect_Source_Click(sender As Object, e As EventArgs) Handles RbtConnect.CheckedChanged,
-                                                                                RbtLineIn.CheckedChanged,
-                                                                                RbtQueue.CheckedChanged,
-                                                                                RbtTV.CheckedChanged
+   Private Sub TmrMain_Tick(sender As Object, e As EventArgs) Handles TmrMain.Tick
       Try
-         If DirectCast(sender, RadioButton).Checked Then
-            Select Case DirectCast(sender, RadioButton).Name
-               Case NameOf(RbtConnect)
-                  GrpQueue.Enabled = False
-                  CmbFavorites.Enabled = False
-                  Sonos.SwitchTo.LineIn(Me.ip, Sonos.Rooms.devices.Where(Function(x) x.Value.Type = Device_Type.Connect).Single.Value)
-               Case NameOf(RbtTV)
-                  GrpQueue.Enabled = False
-                  CmbFavorites.Enabled = False
-                  Sonos.SwitchTo.TVIn(Me.ip, Sonos.Rooms.devices.Where(Function(x) x.Value.Type = Device_Type.Beam OrElse x.Value.Type = Device_Type.PlayBar OrElse x.Value.Type = Device_Type.SoundBar).Single.Value)
-               Case NameOf(RbtLineIn)
-                  GrpQueue.Enabled = False
-                  CmbFavorites.Enabled = False
-                  Sonos.SwitchTo.LineIn(Sonos.Rooms.devices(Me.ip.ToString))
-               Case NameOf(RbtQueue)
-                  GrpQueue.Enabled = True
-                  CmbFavorites.Enabled = True
+         If Me.ip Is Nothing Then
+            ContextMenuStrip = CmsMain
+            LblNasTracksCount.Text = Sonos.NASTracks.Count.ToString
 
-                  RbtTrackFavorits.Enabled = If(Sonos.NASTracks.Count > 0, True, False)
-                  RbtTrackNasFavorits.Enabled = If(Sonos.NASTracks.Count > 0, True, False)
-                  Sonos.SwitchTo.QueueIn(Me.ip, Sonos.Rooms.devices(Me.ip.ToString))
+            Me.ip = Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP
 
-                  If RbtRadioFavorits.Checked Then
-                     GetRadioFavorites()
-                  ElseIf RbtTrackFavorits.Checked Then
-                     GetTrackFavorites()
-                  ElseIf RbtTrackNasFavorits.Checked Then
-                     GetTracksFromNAS()
-                  End If
-            End Select
 
-            Sonos.Sound.Play(Me.ip)
+            GrpSource.Enabled = True
+            Enabled = True
+
+            SetSonosFunctionsRadioButtons()
+         Else
+            PicSpeaker.Image = If(Sonos.Sound.GroupMute(Me.ip), My.Resources.speaker_off, My.Resources.speaker_on)
+            TrkSonosVolume.Value = Sonos.Sound.GroupVolume(Me.ip)
+            Me.playMode = Sonos.Sound.PlayMode(Me.ip)
+
+            If RbtConnect.Checked Then
+               Text = "Source: Sonos connect"
+            ElseIf RbtLineIn.Checked Then
+               Text = $"Source: {Sonos.Rooms.devices(Me.ip.ToString).Type} lineIn"
+            ElseIf RbtQueue.Checked Then
+               Text = Sonos.Queue.TrackPositionInfo(Me.ip).TitleAndArtist
+            ElseIf RbtTV.Checked Then
+               Text = $"Source: {Sonos.Rooms.devices(Me.ip.ToString).Type} TV"
+            End If
          End If
       Catch ex As Exception
+         Text = ex.Message
       End Try
    End Sub
 
-   Private Sub GetTracksFromNAS()
-      CmbFavorites.Items.Clear()
-
-      Dim ordinal = 0
-      For Each track In Sonos.NASTracks
-         CmbFavorites.Items.Add(New Favorite With {.Title = track.Substring(15), .StreamURI = "x-file-cifs:" + track.Replace("\", "/"), .RemoteURI = track, .Ordinal = ordinal})
-         ordinal += 1
-      Next
-
-      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
-   End Sub
-
-   Private Sub GetTrackFavorites()
-      Dim insertPointer = 0
-
-      Me.favorites.Clear()
-      CmbFavorites.Items.Clear()
-      Dim favorites = Sonos.SonosFavorites(Me.ip)                                                        ' Get ALL Sonos favorites
-
-      For Each favorite In favorites
-         If favorite.StreamURI.Contains(".mp3") Then
-            CmbFavorites.Items.Insert(insertPointer, favorite)
-            insertPointer = 1
-         End If
-      Next
-
-      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
-   End Sub
-
-   Private Sub GetRadioFavorites()
-      Dim insertPointer = 0
-
-      Me.favorites.Clear()
-      CmbFavorites.Items.Clear()
-      Me.favorites = Sonos.SonosFavorites(Me.ip)                                                         ' Get ALL Sonos favorites
-
-      For Each favorite In Me.favorites
-         If Not favorite.StreamURI.Contains(".mp3") Then
-            CmbFavorites.Items.Insert(insertPointer, favorite)
-            insertPointer = 1
-         End If
-      Next
-
-      CmbFavorites.SelectedIndex = 0                                                                     ' + activate CmbFavorites.SelectedIndexChanged
-   End Sub
-
-   Private Sub RbtRadioFavorits_CheckedChanged(sender As Object, e As EventArgs) Handles RbtRadioFavorits.CheckedChanged,
-                                                                                         RbtTrackFavorits.CheckedChanged,
-                                                                                         RbtTrackNasFavorits.CheckedChanged
-      If DirectCast(sender, RadioButton).Checked Then
-         Select Case DirectCast(sender, RadioButton).Name
-            Case NameOf(RbtRadioFavorits)
-               BtnNextSong.Enabled = False
-               BtnPreviousSong.Enabled = False
-               BtnTrackRewind.Enabled = False
-               BtnFilter.Enabled = False
-
-               GetRadioFavorites()
-            Case NameOf(RbtTrackFavorits)
-               BtnNextSong.Enabled = False
-               BtnPreviousSong.Enabled = False
-               BtnTrackRewind.Enabled = False
-               BtnFilter.Enabled = False
-
-               GetTrackFavorites()
-            Case NameOf(RbtTrackNasFavorits)
-               GetTracksFromNAS()
-
-               If CmbFavorites.Items.Count > 0 Then
-                  BtnNextSong.Enabled = True
-                  BtnPreviousSong.Enabled = True
-                  BtnTrackRewind.Enabled = True
-                  BtnFilter.Enabled = True
-
-                  CmbFavorites_SelectedIndexChanged(CmbFavorites, Nothing)
-               End If
-         End Select
-      End If
-   End Sub
-
-   Private Sub Sonos_Device_Search(msg As String) Handles Sonos.Device_Search
-      Text = msg
-   End Sub
-
-   Private Sub SetSonosFunctionsRadioButtons()
-      Dim TV = Sonos.Rooms(TxtSelectedRoom.Text).Values.Any(Function(x) x.Type = Device_Type.Beam OrElse x.Type = Device_Type.PlayBar OrElse x.Type = Device_Type.SoundBar)
-
-      RbtConnect.Enabled = Sonos.Rooms.devices.Values.Any(Function(x) x.Type = Device_Type.Connect)
-      RbtLineIn.Enabled = Sonos.Rooms(TxtSelectedRoom.Text).Values.Any(Function(x) x.Type = Device_Type.Play5)
-      RbtTV.Enabled = TV
-
-      If TV Then
-         RbtTV.Checked = True
-      Else
-         RbtQueue.Checked = True
-      End If
+   Private Sub TrkSonosVolume_Scroll(sender As Object, e As EventArgs) Handles TrkSonosVolume.Scroll
+      Sonos.Sound.GroupVolume(Me.ip) = TrkSonosVolume.Value
    End Sub
 End Class
 

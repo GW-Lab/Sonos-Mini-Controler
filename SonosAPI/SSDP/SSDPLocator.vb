@@ -29,27 +29,35 @@ Imports System.Threading
 ' BOOTID.UPNP.ORG:   Number increased Each time device sends an initial announce Or an update message 
 
 Public Class SSDPLocator : Inherits SonosAPIBase
+   Public ReadOnly Rooms As Rooms = New Rooms
+
    Const DeviceScanInterval As Integer = 300 ' Ms
    ' XML tags
    Const LOCATION = "LOCATION"
-   Const SERVER = "SERVER"
-   Const XHoushold = "X-RINCON-HOUSEHOLD"
-   Const USN = "USN"
-   Const ST = "ST"
    ' UDP message
    Const msgHeader = "M-SEARCH * HTTP/1.1" + vbCrLf
+
    Const msgHost = "HOST: 239.255.255.250:1900" + vbCrLf
    Const msgMAN = "MAN: ssdp:discover" + vbCrLf
-   Const msgMX = "MX: 3" + vbCrLf                                             ' Respons window in seconds (devices may ramdomly respond with in de delay window)
-   Const msgST = "ST: urn:schemas-upnp-org:device:ZonePlayer:1" + vbCrLf      ' search target USER-AGENT: OS/version UPnP/1.1 product/version 
-   ' Const msgSt = "ST: urn:schemas-upnp-org:device:ssdp:all" + vbCrLf        ' is not used by Sonos devices
-   ReadOnly udpSocket As Socket = New Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
-   ReadOnly multiCastEndPoint As IPEndPoint = New IPEndPoint(IPAddress.Parse("239.255.255.250"), 1900)    ' Create UDP broadcast socket 
+   Const msgMX = "MX: 3" + vbCrLf
+   ' Respons window in seconds (devices may ramdomly respond with in de delay window)
+   Const msgST = "ST: urn:schemas-upnp-org:device:ZonePlayer:1" + vbCrLf
+
+   Const SERVER = "SERVER"
+   Const ST = "ST"
+   Const USN = "USN"
+   Const XHoushold = "X-RINCON-HOUSEHOLD"
    ReadOnly broadcastMessage As Byte() = Encoding.UTF8.GetBytes(msgHeader + msgHost + msgMAN + msgMX + msgST)
+
+   ReadOnly multiCastEndPoint As IPEndPoint = New IPEndPoint(IPAddress.Parse("239.255.255.250"), 1900)
+
+   ' Create UDP broadcast socket 
    ReadOnly TmrSSDPGetRespons As New Timer(AddressOf ProcessRespons, Nothing, 0, DeviceScanInterval)
 
+   ' search target USER-AGENT: OS/version UPnP/1.1 product/version 
+   ' Const msgSt = "ST: urn:schemas-upnp-org:device:ssdp:all" + vbCrLf        ' is not used by Sonos devices
+   ReadOnly udpSocket As Socket = New Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
    Private DevicesToScan As Integer = 20
-   Public ReadOnly Rooms As Rooms = New Rooms
 
    Public Sub ScanNetworkForSonos()
       Try
@@ -58,6 +66,52 @@ Public Class SSDPLocator : Inherits SonosAPIBase
       Catch
       End Try
    End Sub
+
+   Public Async Function Subscribe(subscribeURI As IEnumerable(Of Uri), callbackUri As Uri, Optional timeOutInSeconds As Integer = 360) As Task(Of Boolean)
+      Try
+         For Each uri In subscribeURI
+            Using req = New HttpRequestMessage With {.RequestUri = uri, .Version = HttpVersion.Version11}
+               req.Method = New HttpMethod("SUBSCRIBE")
+               req.Headers.UserAgent.Add(New ProductInfoHeaderValue("Sonos", "1.0"))
+               req.Headers.Add("CALLBACK", $"<{callbackUri.AbsoluteUri}>")
+               req.Headers.Add("NT", "upnp:event")
+               req.Headers.Add("TIMEOUT", $"Second-{timeOutInSeconds}")
+               req.Headers.ConnectionClose = True
+               req.Headers.CacheControl = New CacheControlHeaderValue With {.NoCache = True}
+
+               Using httpClient = New HttpClient()
+                  Await httpClient.SendAsync(req)
+               End Using
+
+               ' Dim response = Await httpClient.SendAsync(req)
+               ' Dim status = $"from {subscriptionUri.Host}. StatusCode: {response.StatusCode}"
+               ' Dim sid = $"SID: {response.Headers.GetValues("SID").First()}"
+               ' Dim timeOut = $"TIMEOUT: {response.Headers.GetValues("TIMEOUT").First}"
+               ' Dim server = $"Server: {response.Headers.GetValues("Server").First}"
+            End Using
+         Next
+
+         Return True
+      Catch e As Exception
+         Return False ' Console.WriteLine("ERROR TRYING TO SUBSCRIBE " & e)
+      End Try
+   End Function
+
+   ' Get Sonos-Device-type
+   Private Function Get_Type(line As String) As Device.Device_Type
+      Select Case line.Substring(line.IndexOf("(") + 1, line.LastIndexOf(")") - line.IndexOf("(") - 1)
+         Case "ANVIL" : Return Device.Device_Type.Sub
+         Case "ZPS1" : Return Device.Device_Type.Play1
+         Case "ZPS13" : Return Device.Device_Type.PlayOne
+         Case "ZPS6" : Return Device.Device_Type.Play5
+         Case "ZPS11" : Return Device.Device_Type.PlayBar
+         Case "ZPS14" : Return Device.Device_Type.Beam
+         Case "BR200" : Return Device.Device_Type.Boost
+         Case "ZPS9" : Return Device.Device_Type.SoundBar
+         Case "ZP90" : Return Device.Device_Type.Connect
+         Case Else : Return Device.Device_Type.Unknown
+      End Select
+   End Function
 
    Private Sub ProcessRespons(obj As Object)
       Try
@@ -122,51 +176,5 @@ Public Class SSDPLocator : Inherits SonosAPIBase
       Catch
       End Try
    End Sub
-
-   ' Get Sonos-Device-type
-   Private Function Get_Type(line As String) As Device.Device_Type
-      Select Case line.Substring(line.IndexOf("(") + 1, line.LastIndexOf(")") - line.IndexOf("(") - 1)
-         Case "ANVIL" : Return Device.Device_Type.Sub
-         Case "ZPS1" : Return Device.Device_Type.Play1
-         Case "ZPS13" : Return Device.Device_Type.PlayOne
-         Case "ZPS6" : Return Device.Device_Type.Play5
-         Case "ZPS11" : Return Device.Device_Type.PlayBar
-         Case "ZPS14" : Return Device.Device_Type.Beam
-         Case "BR200" : Return Device.Device_Type.Boost
-         Case "ZPS9" : Return Device.Device_Type.SoundBar
-         Case "ZP90" : Return Device.Device_Type.Connect
-         Case Else : Return Device.Device_Type.Unknown
-      End Select
-   End Function
-
-   Public Async Function Subscribe(subscribeURI As IEnumerable(Of Uri), callbackUri As Uri, Optional timeOutInSeconds As Integer = 360) As Task(Of Boolean)
-      Try
-         For Each uri In subscribeURI
-            Using req = New HttpRequestMessage With {.RequestUri = uri, .Version = HttpVersion.Version11}
-               req.Method = New HttpMethod("SUBSCRIBE")
-               req.Headers.UserAgent.Add(New ProductInfoHeaderValue("Sonos", "1.0"))
-               req.Headers.Add("CALLBACK", $"<{callbackUri.AbsoluteUri}>")
-               req.Headers.Add("NT", "upnp:event")
-               req.Headers.Add("TIMEOUT", $"Second-{timeOutInSeconds}")
-               req.Headers.ConnectionClose = True
-               req.Headers.CacheControl = New CacheControlHeaderValue With {.NoCache = True}
-
-               Using httpClient = New HttpClient()
-                  Await httpClient.SendAsync(req)
-               End Using
-
-               ' Dim response = Await httpClient.SendAsync(req)
-               ' Dim status = $"from {subscriptionUri.Host}. StatusCode: {response.StatusCode}"
-               ' Dim sid = $"SID: {response.Headers.GetValues("SID").First()}"
-               ' Dim timeOut = $"TIMEOUT: {response.Headers.GetValues("TIMEOUT").First}"
-               ' Dim server = $"Server: {response.Headers.GetValues("Server").First}"
-            End Using
-         Next
-
-         Return True
-      Catch e As Exception
-         Return False ' Console.WriteLine("ERROR TRYING TO SUBSCRIBE " & e)
-      End Try
-   End Function
 End Class
 

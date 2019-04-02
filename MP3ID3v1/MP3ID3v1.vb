@@ -1,24 +1,24 @@
 ﻿' Program..: MP3ID3v1.vb
 ' Author...: G. Wassink
-' Design...: 
+' Design...:
 ' Date.....: 11/03/2019 Last revised:11/03/2019
 ' Notice...: Copyright 1994-2016 All Rights Reserved
 ' Notes....: VB 16.0 RC4 .Net Framework 4.7.2
 ' Files....: None
 ' Programs.:
-' Reserved.: 
+' Reserved.:
 
 Imports System.IO
 Imports System.Text.Encoding
 
 Public Class MP3ID3v1
+   Public Album As Byte() = New Byte(29) {}     ' 30
+   Public Artist As Byte() = New Byte(29) {}    ' 30
+   Public Comment As Byte() = New Byte(29) {}   ' 30
+   Public Genre As Byte() = New Byte(0) {}      ' 01
    Public TAGID As Byte() = New Byte(2) {}      ' 03
    Public Title As Byte() = New Byte(29) {}     ' 30
-   Public Artist As Byte() = New Byte(29) {}    ' 30
-   Public Album As Byte() = New Byte(29) {}     ' 30
-   Public Year As Byte() = New Byte(3) {}       ' 04 
-   Public Comment As Byte() = New Byte(29) {}   ' 30 
-   Public Genre As Byte() = New Byte(0) {}      ' 01
+   Public Year As Byte() = New Byte(3) {}       ' 04
 
    Public Enum Genres As Byte
       Blues = 0

@@ -19,8 +19,8 @@ Imports GWSonos
 Imports GWSonos.Device
 
 Public Class FrmMain
-   Private ReadOnly configuration As Configuration
    Private WithEvents Sonos As GWSonos.Sonos
+   Private ReadOnly configuration As Configuration
 
    Public Sub New()
       InitializeComponent() ' This call is required by the designer.
@@ -45,8 +45,9 @@ Public Class FrmMain
       End If
    End Sub
 
-   Private Sub FrmMain_Load(sender As Object, e As EventArgs) Handles Me.Load
-      Location = New Point(My.Settings.X, My.Settings.Y)
+   Private Sub FrmClosed(sender As Object, e As EventArgs)
+      RemoveHandler DirectCast(sender, FrmSonos).FormClosed, AddressOf FrmClosed
+      Sonos.Rooms(DirectCast(sender, FrmSonos).TxtSelectedRoom.Text).Frm = Nothing
    End Sub
 
    Private Sub FrmMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
@@ -60,11 +61,9 @@ Public Class FrmMain
       My.Settings.TopMost = Me.configuration.TopMost
    End Sub
 
-   Private Sub FrmClosed(sender As Object, e As EventArgs)
-      RemoveHandler DirectCast(sender, FrmSonos).FormClosed, AddressOf FrmClosed
-      Sonos.Rooms(DirectCast(sender, FrmSonos).TxtSelectedRoom.Text).Frm = Nothing
+   Private Sub FrmMain_Load(sender As Object, e As EventArgs) Handles Me.Load
+      Location = New Point(My.Settings.X, My.Settings.Y)
    End Sub
-
    Private Sub Sonos_Search_Completed(roomCount As Integer) Handles Sonos.Search_Completed
       Invoke(Sub()
                 For Each room In Sonos.Rooms.devices.Values.Where(Function(x) x.isZonePlayer AndAlso x.Type <> Device_Type.Boost)

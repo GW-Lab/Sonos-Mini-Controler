@@ -106,7 +106,12 @@ Public Class FrmSonos
       ' Dim t = Me.Sonos.GetZoneGroupAttributes(IPAddress.Parse("192.168.2.184"))
       ' Dim z = Me.sonos.Play(Me.ip)
 
-      Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"), 360)
+      Dim a = Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP
+
+
+      Await Sonos.Subscribe({New Uri("http://" +
+                                     Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP.ToString +
+                                     ":1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"), 360)
       CallBackHandler = New CallBackHandler({"http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"})
 
       ' CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
@@ -329,7 +334,6 @@ Public Class FrmSonos
             LblNasTracksCount.Text = Sonos.NASTracks.Count.ToString
 
             Me.ip = Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP
-
 
             GrpSource.Enabled = True
             Enabled = True

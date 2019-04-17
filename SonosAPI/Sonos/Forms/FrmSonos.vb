@@ -18,7 +18,7 @@ Public Class FrmSonos
    WithEvents SpeechEngine As New SpeechEngine
 
    Private favorites As New Favorites
-   Private frm As Form
+   Private ReadOnly frm As Form
    Private frmFilter As FrmFilter
    Private frmSettings As FrmSettings
    Private ip As Net.IPAddress
@@ -31,7 +31,7 @@ Public Class FrmSonos
       Me.Sonos = sonos ' Add any initialization after the InitializeComponent() call.
       Me.frm = frm
 
-      TmrMain_Tick(Nothing, Nothing)
+      ProcessCallBack(Nothing, Nothing)
    End Sub
 #End Region
 
@@ -56,7 +56,7 @@ Public Class FrmSonos
 
    Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
       BeginInvoke(Sub()
-                     Dim a = 1
+                     ProcessCallBack(Nothing, Nothing)
                   End Sub)
    End Sub
 
@@ -66,8 +66,6 @@ Public Class FrmSonos
          Sonos.Queue.AddTrack(Me.ip, .StreamURI.ToString, .Ordinal)                                           ' Favorite.Ordinal Add track/radio to then current playlist 
          Sonos.Queue.Seek(Me.ip, Unit.TRACK_NR, .Ordinal.ToString)
          Sonos.Sound.Play(Me.ip)
-
-         LblIp.Text = $"{Me.ip}"
       End With
    End Sub
 
@@ -108,8 +106,10 @@ Public Class FrmSonos
       ' Dim t = Me.Sonos.GetZoneGroupAttributes(IPAddress.Parse("192.168.2.184"))
       ' Dim z = Me.sonos.Play(Me.ip)
 
-      'Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://192.168.2.31:3445/notify"), 360)
-      'CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
+      Await Sonos.Subscribe({New Uri("http://192.168.2.105:1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"), 360)
+      CallBackHandler = New CallBackHandler({"http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"})
+
+      ' CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
 
       Location = Me.frm.Location
    End Sub
@@ -322,7 +322,7 @@ Public Class FrmSonos
       End Select
    End Sub
 
-   Private Sub TmrMain_Tick(sender As Object, e As EventArgs) Handles TmrMain.Tick
+   Private Sub ProcessCallBack(sender As Object, e As EventArgs) ' Handles TmrMain.Tick
       Try
          If Me.ip Is Nothing Then
             ContextMenuStrip = CmsMain

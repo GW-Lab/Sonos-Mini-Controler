@@ -112,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sonos\Configuration.vb" />
+    <Compile Include="Sonos\Network\Network.vb" />
     <Compile Include="Sonos\Sonos.vb" />
     <Compile Include="Sonos\Forms\FrmFilter.Designer.vb">
       <DependentUpon>FrmFilter.vb</DependentUpon>

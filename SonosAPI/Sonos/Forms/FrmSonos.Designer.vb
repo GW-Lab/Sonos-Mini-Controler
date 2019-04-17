@@ -5,7 +5,7 @@ Partial Class FrmSonos
    Inherits System.Windows.Forms.Form
 
    'Form overrides dispose to clean up the component list.
-   <System.Diagnostics.DebuggerNonUserCode()> _
+   <System.Diagnostics.DebuggerNonUserCode()>
    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
       Try
          If disposing AndAlso components IsNot Nothing Then
@@ -22,7 +22,7 @@ Partial Class FrmSonos
    'NOTE: The following procedure is required by the Windows Form Designer
    'It can be modified using the Windows Form Designer.  
    'Do not modify it using the code editor.
-   <System.Diagnostics.DebuggerStepThrough()> _
+   <System.Diagnostics.DebuggerStepThrough()>
    Private Sub InitializeComponent()
       Me.components = New System.ComponentModel.Container()
       Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmSonos))
@@ -49,7 +49,6 @@ Partial Class FrmSonos
       Me.BtnNextSong = New System.Windows.Forms.Button()
       Me.BtnPreviousSong = New System.Windows.Forms.Button()
       Me.TxtSelectedRoom = New System.Windows.Forms.TextBox()
-      Me.LblIp = New System.Windows.Forms.Label()
       Me.GrpSource.SuspendLayout()
       Me.GrpQueue.SuspendLayout()
       Me.CmsMain.SuspendLayout()
@@ -61,7 +60,7 @@ Partial Class FrmSonos
       '
       Me.CmbFavorites.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
       Me.CmbFavorites.FormattingEnabled = True
-      Me.CmbFavorites.Location = New System.Drawing.Point(2, 169)
+      Me.CmbFavorites.Location = New System.Drawing.Point(1, 169)
       Me.CmbFavorites.Name = "CmbFavorites"
       Me.CmbFavorites.Size = New System.Drawing.Size(220, 21)
       Me.CmbFavorites.TabIndex = 23
@@ -99,7 +98,7 @@ Partial Class FrmSonos
       'LblNasTracksCount
       '
       Me.LblNasTracksCount.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-      Me.LblNasTracksCount.Location = New System.Drawing.Point(55, 58)
+      Me.LblNasTracksCount.Location = New System.Drawing.Point(57, 58)
       Me.LblNasTracksCount.Name = "LblNasTracksCount"
       Me.LblNasTracksCount.Size = New System.Drawing.Size(48, 18)
       Me.LblNasTracksCount.TabIndex = 15
@@ -109,7 +108,7 @@ Partial Class FrmSonos
       'BtnFilter
       '
       Me.BtnFilter.Enabled = False
-      Me.BtnFilter.Location = New System.Drawing.Point(106, 57)
+      Me.BtnFilter.Location = New System.Drawing.Point(108, 57)
       Me.BtnFilter.Name = "BtnFilter"
       Me.BtnFilter.Size = New System.Drawing.Size(37, 20)
       Me.BtnFilter.TabIndex = 14
@@ -190,7 +189,6 @@ Partial Class FrmSonos
       '
       'TmrMain
       '
-      Me.TmrMain.Enabled = True
       Me.TmrMain.Interval = 10000
       '
       'MnuScan
@@ -278,21 +276,11 @@ Partial Class FrmSonos
       Me.TxtSelectedRoom.TabIndex = 24
       Me.TxtSelectedRoom.Text = "Room Name"
       '
-      'LblIp
-      '
-      Me.LblIp.AutoSize = True
-      Me.LblIp.Location = New System.Drawing.Point(7, 196)
-      Me.LblIp.Name = "LblIp"
-      Me.LblIp.Size = New System.Drawing.Size(39, 13)
-      Me.LblIp.TabIndex = 25
-      Me.LblIp.Text = "Label1"
-      '
       'FrmSonos
       '
       Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
       Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-      Me.ClientSize = New System.Drawing.Size(223, 215)
-      Me.Controls.Add(Me.LblIp)
+      Me.ClientSize = New System.Drawing.Size(223, 191)
       Me.Controls.Add(Me.TxtSelectedRoom)
       Me.Controls.Add(Me.CmbFavorites)
       Me.Controls.Add(Me.GrpSource)
@@ -340,5 +328,4 @@ Partial Class FrmSonos
    Friend WithEvents TrkSonosVolume As Windows.Forms.TrackBar
    Friend WithEvents BtnPreviousSong As Windows.Forms.Button
    Public WithEvents TxtSelectedRoom As Windows.Forms.TextBox
-   Friend WithEvents LblIp As Windows.Forms.Label
 End Class

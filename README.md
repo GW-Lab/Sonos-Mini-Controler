@@ -15,4 +15,4 @@ The Sonos mini controler has also a simple speech commander: based on .NET frame
 3.  Next track, Previous track, Rewind track
 
 ToDo:
-Implement callback updates (Update is now done via polling)
+Refine callbacks and use it's data in the right context

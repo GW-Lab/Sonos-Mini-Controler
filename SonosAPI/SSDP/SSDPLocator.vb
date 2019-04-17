@@ -67,7 +67,7 @@ Public Class SSDPLocator : Inherits SonosAPIBase
       End Try
    End Sub
 
-   Public Async Function Subscribe(subscribeURI As IEnumerable(Of Uri), callbackUri As Uri, Optional timeOutInSeconds As Integer = 360) As Task(Of Boolean)
+   Public Async Function Subscribe(subscribeURI As IEnumerable(Of Uri), callbackUri As Uri, Optional timeOutInSeconds As Integer = 3600) As Task(Of Boolean)
       Try
          For Each uri In subscribeURI
             Using req = New HttpRequestMessage With {.RequestUri = uri, .Version = HttpVersion.Version11}

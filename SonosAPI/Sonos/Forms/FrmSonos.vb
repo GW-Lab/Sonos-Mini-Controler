@@ -111,7 +111,7 @@ Public Class FrmSonos
 
       Await Sonos.Subscribe({New Uri("http://" +
                                      Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP.ToString +
-                                     ":1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"), 360)
+                                     ":1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"))
       CallBackHandler = New CallBackHandler({"http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"})
 
       ' CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})

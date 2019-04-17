@@ -39,15 +39,12 @@ Imports System.Net
 'def main_cli()
 '41     num_args = len(argv)
 '42
-
 '43     if num_args < 2:
 '44         print(usage_text)
 '45         return
 '46
-
 '47     cmd = argv[1]
 '48
-
 '49     if cmd == "list":
 '50         if num_args == 2:
 '51             list_socos()
@@ -68,7 +65,6 @@ Imports System.Net
 '66     else:
 '67         print(usage_text)
 '68
-
 '69 def list_socos(interface_addr=None):
 '70     devs = soco.discover(interface_addr=interface_addr)
 '71     for dev in devs:
@@ -76,16 +72,13 @@ Imports System.Net
 '73         name = dev.player_name
 '74         print("{:<15}  {}".format(ip, name))
 '75
-
 '76 def pair_socos(l_ip, r_ip):
 '77     l_soco = soco.SoCo(l_ip)
 '78     r_soco = soco.SoCo(r_ip)
 '79
-
 '80     l_uid = l_soco.uid
 '81     r_uid = r_soco.uid
 '82
-
 '83     req_addr = request_address_format.format(l_ip)
 '84     req_headers = {
 '85         "Content-Type": "application/xml",
@@ -93,16 +86,12 @@ Imports System.Net
 '87     }
 '88     req_payload = pair_payload_format.format(l_uid, r_uid)
 '89
-
 '90     response = requests.post(req_addr, data=req_payload, headers=req_headers)
 '91
-
 '92     if response.status_code != 200:
 '93         print("failed to pair")
 '94
-
 '95
-
 '96 def unpair_socos(master_ip):
 '97     req_addr = request_address_format.format(master_ip)
 '98     req_headers = {
@@ -111,14 +100,11 @@ Imports System.Net
 '101     }
 '102     req_payload = unpair_payload_format
 '103
-
 '104     response = requests.post(req_addr, data=req_payload, headers=req_headers)
 '105
-
 '106     if response.status_code != 200:
 '107         print("failed to unpair")
 '108
-
 '109 if __name__ == "__main__":
 '110     main_cli()
 

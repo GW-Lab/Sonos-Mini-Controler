@@ -3,7 +3,7 @@
 ' Design...: 
 ' Date.....: 11/03/2019 Last revised:11/03/2019
 ' Notice...: Copyright 1994-2016 All Rights Reserved
-' Notes....: VB 16.0 RC4 .Net Framework 4.7.2
+' Notes....: VB16.0.2 .NET Framework 4.8
 ' Files....: None
 ' Programs.:
 ' Reserved.: 
@@ -13,7 +13,6 @@ Imports GWSonos.SpeechEngineBase
 Imports System.Windows.Forms
 
 Public Class FrmSonos
-   WithEvents CallBackHandler As CallBackHandler
    WithEvents Sonos As Sonos
    WithEvents SpeechEngine As New SpeechEngine
 
@@ -53,13 +52,6 @@ Public Class FrmSonos
       Me.frmFilter = New FrmFilter(Me.Sonos, Me.ip, Me)
       Me.frmFilter.Show(Me)
    End Sub
-
-   Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
-      BeginInvoke(Sub()
-                     ProcessCallBack(Nothing, Nothing)
-                  End Sub)
-   End Sub
-
    Private Sub CmbFavorites_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbFavorites.SelectedIndexChanged
       With DirectCast(DirectCast(sender, ComboBox).SelectedItem, Favorite)
          Sonos.Queue.Clear(Me.ip)
@@ -106,16 +98,8 @@ Public Class FrmSonos
       ' Dim t = Me.Sonos.GetZoneGroupAttributes(IPAddress.Parse("192.168.2.184"))
       ' Dim z = Me.sonos.Play(Me.ip)
 
-      Dim a = Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP
-
-
-      Await Sonos.Subscribe({New Uri("http://" +
-                                     Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP.ToString +
-                                     ":1400/MediaRenderer/RenderingControl/Event")}, New Uri("http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"))
-      CallBackHandler = New CallBackHandler({"http://" + Network.GetLocalIPAddress.ToString + ":3445/notify/"})
-
-      ' CallBackHandler = New CallBackHandler({"http://192.168.2.31:3445/notify/"})
-
+      Await Sonos.Subscribe({New Uri($"http://{Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP}:1400/MediaRenderer/RenderingControl/Event")},
+                            New Uri($"http://{Network.GetLocalIPAddress}:3445/notify/"))
       Location = Me.frm.Location
    End Sub
 
@@ -327,7 +311,7 @@ Public Class FrmSonos
       End Select
    End Sub
 
-   Private Sub ProcessCallBack(sender As Object, e As EventArgs) ' Handles TmrMain.Tick
+   Public Sub ProcessCallBack(sender As Object, e As EventArgs) ' Handles TmrMain.Tick
       Try
          If Me.ip Is Nothing Then
             ContextMenuStrip = CmsMain

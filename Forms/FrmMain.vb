@@ -3,7 +3,7 @@
 ' Design...: 
 ' Date.....: 11/03/2019 Last revised:11/03/2019
 ' Notice...: Copyright 1994-2016 All Rights Reserved
-' Notes....: VB 16.0 RC4 .Net Framework 4.7.2
+' Notes....: VB16.0.2 .NET Framework 4.8
 ' Files....: None
 ' Programs.:
 ' Reserved.:This SOFTWARE PRODUCT is provided by THE PROVIDER "as is" and "with all faults." THE PROVIDER makes no representations or warranties of any kind concerning the safety,
@@ -19,6 +19,7 @@ Imports GWSonos
 Imports GWSonos.Device
 
 Public Class FrmMain
+   WithEvents CallBackHandler As CallBackHandler
    Private WithEvents Sonos As GWSonos.Sonos
    Private ReadOnly configuration As Configuration
 
@@ -34,6 +35,8 @@ Public Class FrmMain
                                                  .Interval = My.Settings.Interval,
                                                  .TopMost = My.Settings.TopMost}
       Sonos = New GWSonos.Sonos(Me.configuration)
+
+      CallBackHandler = New CallBackHandler({$"http://{Network.GetLocalIPAddress}:3445/notify/"})
    End Sub
 
    Private Sub CmbRooms_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbRooms.SelectedIndexChanged
@@ -77,5 +80,12 @@ Public Class FrmMain
                    Text = $"Sonos not found!!!"
                 End If
              End Sub)
+   End Sub
+   Private Sub CallBackHandler_Data_Recieved(msg As String) Handles CallBackHandler.Data_Recieved
+      Me.Invoke(Sub()
+                   For Each room In Sonos.Rooms.Values.Where(Function(x) x.Frm IsNot Nothing)
+                      room.Frm.ProcessCallBack(Nothing, Nothing)
+                   Next
+                End Sub)
    End Sub
 End Class

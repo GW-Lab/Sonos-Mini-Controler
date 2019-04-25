@@ -29,7 +29,6 @@ Public Class Grammars : Inherits List(Of Grammar)
       Grammer2Words()
       Grammer3Words()
       Grammer4Words()
-      '  Grammer5Words()
    End Sub
 
    Public Sub Grammer1Word()
@@ -40,69 +39,45 @@ Public Class Grammars : Inherits List(Of Grammar)
    End Sub
 
    Private Sub Grammer2Words()
-      TwoWords("sonos", "mute")
-      TwoWords("sonos", "next")
-      TwoWords("sonos", "previous") ' Skip to previous track
-      TwoWords("sonos", "pause")    ' Skip to next track
-      TwoWords("sonos", "resume")
-      TwoWords("sonos", "rewind")
-      TwoWords("sonos", "stop")
+      Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
+      gb.Append(New Choices("sonos mute",
+                            "sonos next",
+                            "sonos previous",
+                            "sonos pause",
+                            "sonos resume",
+                            "sonos rewind",
+                            "sonos stop"))
+
+      Add(New Grammar(gb) With {.Name = "2Word"})
    End Sub
 
    Private Sub Grammer3Words()
-      ThreeWords("sonos", "bass", "down")
-      ThreeWords("sonos", "bass", "up")
-      ThreeWords("sonos", "mute", "off")
-      ThreeWords("sonos", "mute", "on")
-      ThreeWords("sonos", "rewind", "song")
-      ThreeWords("sonos", "rewind", "track")
-      ThreeWords("sonos", "next", "song")
-      ThreeWords("sonos", "next", "track")
-      ThreeWords("sonos", "previous", "song")
-      ThreeWords("sonos", "previous", "track")
-      ThreeWords("sonos", "volume", "down")
-      ThreeWords("sonos", "volume", "up")
-      ThreeWords("sonos", "repeat", "off")
-      ThreeWords("sonos", "repeat", "on")
-      ThreeWords("sonos", "shuffle", "off")
-      ThreeWords("sonos", "shuffle", "on")
+      Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
+      gb.Append(New Choices("sonos bass down",
+                            "sonos bass up",
+                            "sonos mute off",
+                            "sonos mute on",
+                            "sonos rewind song",
+                            "sonos rewind track",
+                            "sonos next song",
+                            "sonos next track",
+                            "sonos previous song",
+                            "sonos previous track",
+                            "sonos volume down",
+                            "sonos volume up",
+                            "sonos repeat off",
+                            "sonos repeat on",
+                            "sonos shuffle off",
+                            "sonos shuffle on"))
+
+      Add(New Grammar(gb) With {.Name = "3Word"})
    End Sub
 
    Private Sub Grammer4Words()
-      FourWords("sonos", "rewind", "current", "song")
-      FourWords("sonos", "rewind", "current", "track")
-   End Sub
-
-   'Private Sub Grammer5Words()
-   '   FiveWords("will", "she", "give", "a", "blowjob")
-   'End Sub
-
-   Private Sub TwoWords(word1 As String, word2 As String)
       Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
+      gb.Append(New Choices("sonos rewind current song", "sonos rewind current track"))
 
-      gb.Append($"{word1} {word2}")
-      Add(New Grammar(gb) With {.Name = "2Words"})
+      Add(New Grammar(gb) With {.Name = "4Word"})
    End Sub
-
-   Private Sub ThreeWords(word1 As String, word2 As String, word3 As String)
-      Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
-
-      gb.Append($"{word1} {word2} {word3}")
-      Add(New Grammar(gb) With {.Name = "3Words"})
-   End Sub
-
-   Private Sub FourWords(word1 As String, word2 As String, word3 As String, word4 As String)
-      Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
-
-      gb.Append($"{word1} {word2} {word3} {word4}")
-      Add(New Grammar(gb) With {.Name = "4Words"})
-   End Sub
-
-   'Private Sub FiveWords(word1 As String, word2 As String, word3 As String, word4 As String, word5 As String)
-   '   Dim gb As New GrammarBuilder With {.Culture = New Globalization.CultureInfo("en-US")}
-
-   '   gb.Append($"{word1} {word2} {word3} {word4} {word5}")
-   '   Add(New Grammar(gb) With {.Name = "5Words"})
-   'End Sub
 End Class
 

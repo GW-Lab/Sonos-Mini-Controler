@@ -10,7 +10,7 @@ Imports System.Threading
 Public Class CallBackHandler
    ReadOnly stopEvent As ManualResetEvent = New ManualResetEvent(False)
 
-   Public Event Data_Recieved(msg As String, remoteIP As IPAddress)
+   Public Event Data_Recieved(msg As String, ipEndPoint As IPEndPoint)
 
    Public Sub New(eventURI As IEnumerable(Of String))
       Dim listener = New HttpListener()
@@ -49,7 +49,7 @@ Public Class CallBackHandler
          If context IsNot Nothing Then
             If context.Request.HasEntityBody Then
                Using sr = New IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding)
-                  RaiseEvent Data_Recieved(sr.ReadToEnd(), context.Request.RemoteEndPoint.Address)
+                  RaiseEvent Data_Recieved(sr.ReadToEnd(), context.Request.RemoteEndPoint)
                End Using
             End If
 

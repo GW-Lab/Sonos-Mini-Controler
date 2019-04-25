@@ -82,9 +82,9 @@ Public Class FrmMain
                 End If
              End Sub)
    End Sub
-   Private Sub CallBackHandler_Data_Recieved(msg As String, remoteIP As IPAddress) Handles CallBackHandler.Data_Recieved
+   Private Sub CallBackHandler_Data_Recieved(msg As String, ipEndPoint As IPEndPoint) Handles CallBackHandler.Data_Recieved
       Me.Invoke(Sub()
-                   Sonos.Rooms.devices(remoteIP.ToString).room.Frm.ProcessCallBack(msg)
+                   Sonos.Rooms.devices(ipEndPoint.Address.ToString).room.Frm.ProcessCallBack(msg)
                 End Sub)
    End Sub
 End Class

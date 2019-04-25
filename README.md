@@ -15,4 +15,5 @@ The Sonos mini controler has also a simple speech commander: based on .NET frame
 3.  Next track, Previous track, Rewind track
 
 ToDo:
-Refine callbacks and use it's data in the right context
+1.  Refine callbacks and use it's data in the right context
+2.  Combine Rooms

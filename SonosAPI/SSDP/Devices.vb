@@ -22,6 +22,7 @@ Public Class Device
    Public Server As String = ""
    Public ST As String = ""
    Public XHoushold As String = ""
+   Public room As Room
 
    Private _USN As String
 
@@ -37,6 +38,10 @@ Public Class Device
       [Sub]
       Unknown
    End Enum
+
+   Public Sub New(room As Room)
+      Me.room = room
+   End Sub
 
    Public Property USN As String
       Get

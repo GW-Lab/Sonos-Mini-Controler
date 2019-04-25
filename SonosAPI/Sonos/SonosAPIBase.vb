@@ -109,15 +109,10 @@ Imports System.Net
 '110     main_cli()
 
 Public MustInherit Class SonosAPIBase : Inherits WebRequest
-
 #Region "Events"
-
    Public Event Device_Changed(dev As Device)
-
    Public Event Device_Search(msg As String)
-
    Public Event Search_Completed(roomsFound As Integer)
-
 #End Region
 
    Public Property Led(ip As IPAddress) As Boolean

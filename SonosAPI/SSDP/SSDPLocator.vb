@@ -48,9 +48,7 @@ Public Class SSDPLocator : Inherits SonosAPIBase
    Const USN = "USN"
    Const XHoushold = "X-RINCON-HOUSEHOLD"
    ReadOnly broadcastMessage As Byte() = Encoding.UTF8.GetBytes(msgHeader + msgHost + msgMAN + msgMX + msgST)
-
    ReadOnly multiCastEndPoint As IPEndPoint = New IPEndPoint(IPAddress.Parse("239.255.255.250"), 1900)
-
    ' Create UDP broadcast socket 
    ReadOnly TmrSSDPGetRespons As New Timer(AddressOf ProcessRespons, Nothing, 0, DeviceScanInterval)
 
@@ -134,10 +132,12 @@ Public Class SSDPLocator : Inherits SonosAPIBase
                         Dim isZonePlayer = GetZoneGroupAttributes(IPAddress.Parse(currIP)).Descendants("CurrentZonePlayerUUIDsInGroup").Value <> ""
 
                         If Me.Rooms.ContainsKey(currRoomName) Then
-                           Me.Rooms(currRoomName).Add(currIP, New Device() With {.IP = IPAddress.Parse(currIP), .LocationXML = line, .Name = currRoomName, .isZonePlayer = isZonePlayer})
+                           Me.Rooms(currRoomName).Add(currIP, New Device(Me.Rooms(currRoomName)) With {.IP = IPAddress.Parse(currIP), .LocationXML = line, .Name = currRoomName, .isZonePlayer = isZonePlayer})
                         Else
-                           Me.Rooms.Add(currRoomName, New Room With {.Name = currRoomName})
-                           Me.Rooms(currRoomName).Add(currIP, New Device() With {.IP = IPAddress.Parse(currIP), .LocationXML = line, .Name = currRoomName, .isZonePlayer = isZonePlayer})
+                           Dim room = New Room With {.Name = currRoomName}
+
+                           Me.Rooms.Add(currRoomName, room)
+                           Me.Rooms(currRoomName).Add(currIP, New Device(room) With {.IP = IPAddress.Parse(currIP), .LocationXML = line, .Name = currRoomName, .isZonePlayer = isZonePlayer})
                         End If
 
                         Me.Rooms.devices.Add(currIP, Me.Rooms(currRoomName)(currIP))

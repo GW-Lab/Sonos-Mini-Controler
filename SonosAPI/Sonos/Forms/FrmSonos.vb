@@ -30,7 +30,7 @@ Public Class FrmSonos
       Me.Sonos = sonos ' Add any initialization after the InitializeComponent() call.
       Me.frm = frm
 
-      ProcessCallBack(Nothing, Nothing)
+      ProcessCallBack("")
    End Sub
 #End Region
 
@@ -99,7 +99,7 @@ Public Class FrmSonos
       ' Dim z = Me.sonos.Play(Me.ip)
 
       Await Sonos.Subscribe({New Uri($"http://{Sonos.Rooms(TxtSelectedRoom.Text).Values.Where(Function(x) x.isZonePlayer).Single.IP}:1400/MediaRenderer/RenderingControl/Event")},
-                            New Uri($"http://{Network.GetLocalIPAddress}:3445/notify/"))
+                             New Uri($"http://{Network.GetLocalIPAddress}:3445/notify/"))
       Location = Me.frm.Location
    End Sub
 
@@ -311,7 +311,7 @@ Public Class FrmSonos
       End Select
    End Sub
 
-   Public Sub ProcessCallBack(sender As Object, e As EventArgs) ' Handles TmrMain.Tick
+   Public Sub ProcessCallBack(msg As String) ' Handles TmrMain.Tick
       Try
          If Me.ip Is Nothing Then
             ContextMenuStrip = CmsMain
